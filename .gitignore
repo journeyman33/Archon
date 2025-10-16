@@ -1,18 +1,116 @@
-__pycache__
+# === ARCHON PROJECT GITIGNORE ===
+# Combines user custom entries + full stack ignores for Python, Node, Supabase, Docker, etc.
+
+# ----------------------------
+# OS & IDE files
+# ----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.code-workspace
+.zed/
+
+# ----------------------------
+# Python environments / caches
+# ----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+Pipfile.lock
+poetry.lock
+
+# ----------------------------
+# Node / Frontend builds
+# ----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# ----------------------------
+# Supabase / Local Database
+# ----------------------------
+.supabase/
+*.db
+*.sqlite
+supabase/.temp/
+supabase/.local/
+supabase/.env.local
+
+# ----------------------------
+# Docker / Environment
+# ----------------------------
+*.pid
+*.log
+docker-compose.override.yml
 .env
+.env.*
+.envrc
+*.bak
+
+# ----------------------------
+# Custom project directories
+# ----------------------------
 .serena
-.claude/settings.local.json
 PRPs/local
 PRPs/completed/
 PRPs/stories/
 PRPs/reviews/
-/logs/
-.zed
 tmp/
 temp/
 UAT/
+logs/
+log/
 
-.DS_Store
+# ----------------------------
+# PowerShell / Local scripts
+# ----------------------------
+sync-archon.ps1
+*.ps1~
+*.ps1.bak
 
-# Local release notes testing
+# ----------------------------
+# Release testing
+# ----------------------------
 release-notes-*.md
+
+# ----------------------------
+# OS Backups / Temp Files
+# ----------------------------
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.orig
+*.old
+*.zip
+*.tar
+*.tar.gz
+
+# ----------------------------
+# Output / Generated files
+# ----------------------------
+out/
+__generated__/
+.cache/
+.history/
+
+# ----------------------------
+# Archon-specific folders
+# ----------------------------
+supabase/migrations/.history/
+archon-example-workflow/.cache/
+archon-example-workflow/output/
+archon-example-workflow/logs/
+
