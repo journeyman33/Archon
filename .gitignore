@@ -1,5 +1,7 @@
 # === ARCHON PROJECT GITIGNORE ===
 # Combines user custom entries + full stack ignores for Python, Node, Supabase, Docker, etc.
+# Local-only developer documentation
+mydocs/
 
 # ----------------------------
 # OS & IDE files
