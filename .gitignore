@@ -3,6 +3,9 @@
 # Local-only developer documentation
 mydocs/
 
+# where I download my knowlede base file
+knowledge/
+!knowledge/.gitkeep
 # ----------------------------
 # OS & IDE files
 # ----------------------------
