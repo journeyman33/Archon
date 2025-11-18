@@ -133,16 +133,47 @@ Running Supabase locally avoids cold starts, network issues, and usage limits. H
 
 4. **Start Services** (choose one):
 
-   **Full Docker Mode (Recommended for Normal Archon Usage)**
+   **🚀 Recommended: Use Startup Script (Robust with Health Checks)**
 
-   ```bash
-   docker compose up --build -d
+   For **Windows PowerShell**:
+   ```powershell
+   .\start-archon.ps1
    ```
 
-   This starts all core microservices in Docker:
+   For **Linux/Mac**:
+   ```bash
+   ./start-archon.sh
+   ```
+
+   The startup script:
+   - ✅ Checks prerequisites (Docker, Docker Compose)
+   - ✅ Starts Supabase in correct order (if using local)
+   - ✅ Waits for each service to be healthy before proceeding
+   - ✅ Tests API endpoints to ensure everything is working
+   - ✅ Displays clear status and access URLs
+   
+   Options:
+   - `--skip-supabase`: Skip Supabase startup (if already running or using cloud)
+   - `--verbose` / `-v`: Show detailed progress
+   - `--help` / `-h`: Show usage information
+
+   **Alternative: Manual Docker Compose**
+
+   ```bash
+   # Start Supabase (if using local)
+   cd ../supabase-local && docker compose -p supabase up -d && cd ../archon
+   
+   # Start Archon services (use -p archon for better namespace isolation)
+   docker compose -p archon up -d archon-server archon-mcp
+   
+   # Start frontend (in separate terminal)
+   cd archon-ui-main && npm run dev
+   ```
+
+   This starts all core microservices:
    - **Server**: Core API and business logic (Port: 8181)
    - **MCP Server**: Protocol interface for AI clients (Port: 8051)
-   - **UI**: Web interface (Port: 3737)
+   - **Frontend**: Web interface (Port: 3737, via npm)
 
    Ports are configurable in your .env as well!
 
@@ -517,11 +548,39 @@ newgrp docker
   git config --global core.autocrlf false
   ```
 
+#### Frontend Crashes or Times Out
+
+**Symptoms**: Frontend dev server (Vite) crashes with timeout errors, or "The site can't be reached"
+
+**Common Causes**:
+1. **MCP container not running** - The frontend expects both `archon-server` and `archon-mcp` to be running
+2. **Backend not fully started** - Backend may still be initializing when frontend tries to connect
+3. **Too many simultaneous requests** - Initial page load makes many API calls
+
+**Solutions**:
+```bash
+# 1. Use the startup script (recommended) - it handles health checks
+.\start-archon.ps1  # Windows
+./start-archon.sh   # Linux/Mac
+
+# 2. Manual fix - ensure all services are running
+docker compose ps  # Check status
+docker compose up -d archon-server archon-mcp  # Start both containers
+docker compose logs archon-server --tail 50  # Check for errors
+
+# 3. Wait for backend to be fully ready before starting frontend
+curl http://localhost:8181/api/health  # Should return {"status":"healthy"}
+cd archon-ui-main && npm run dev
+```
+
+**Prevention**: Always use the startup scripts (`start-archon.ps1` or `start-archon.sh`) which include proper health checks and startup sequencing.
+
 #### Frontend Can't Connect to Backend
 
-- Check backend is running: `curl http://localhost:8181/health`
+- Check backend is running: `curl http://localhost:8181/api/health`
 - Verify port configuration in `.env`
 - For custom ports, ensure both `ARCHON_SERVER_PORT` and `VITE_ARCHON_SERVER_PORT` are set
+- Ensure both `archon-server` AND `archon-mcp` containers are running: `docker compose ps`
 
 #### Docker Compose Hangs
 
