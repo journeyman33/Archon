@@ -68,14 +68,14 @@ def validate_supabase_key(supabase_key: str) -> tuple[bool, str]:
         # Also skip all other validations (aud, exp, etc) since we only care about the role
         decoded = jwt.decode(
             supabase_key,
-            '',
+            "",
             options={
                 "verify_signature": False,
                 "verify_aud": False,
                 "verify_exp": False,
                 "verify_nbf": False,
-                "verify_iat": False
-            }
+                "verify_iat": False,
+            },
         )
         role = decoded.get("role")
 
@@ -107,7 +107,7 @@ def validate_supabase_url(url: str) -> bool:
         hostname = parsed.hostname or ""
 
         # Check for exact localhost and Docker internal hosts (security: prevent subdomain bypass)
-        local_hosts = ["localhost", "127.0.0.1", "host.docker.internal"]
+        local_hosts = ["localhost", "127.0.0.1", "host.docker.internal", "supabase-rest", "supabase-kong"]
         if hostname in local_hosts or hostname.endswith(".localhost"):
             return True
 

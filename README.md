@@ -60,11 +60,52 @@ This new vision for Archon replaces the old one (the agenteer). Archon used to b
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Node.js 18+](https://nodejs.org/) (for hybrid development mode)
-- [Supabase](https://supabase.com/) account (free tier or local Supabase both work)
+- [Supabase](https://supabase.com/) account (free tier) **OR** [Local Supabase](#local-supabase-setup-recommended-for-development) (recommended for development)
 - [OpenAI API key](https://platform.openai.com/api-keys) (Gemini and Ollama are supported too!)
 - (OPTIONAL) [Make](https://www.gnu.org/software/make/) (see [Installing Make](#installing-make) below)
 
-### Setup Instructions
+### Local Supabase Setup (Recommended for Development)
+
+Running Supabase locally avoids cold starts, network issues, and usage limits. Here's how to set it up:
+
+1. **Navigate to the supabase-local directory** (from Archon root):
+   ```bash
+   cd ../supabase-local
+   ```
+
+2. **Start Supabase services**:
+   ```bash
+   docker compose -p supabase up -d
+   ```
+
+3. **Update your Archon `.env` file**:
+   ```bash
+   # Local Supabase configuration
+   SUPABASE_URL=http://supabase-kong:8000
+   SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+   ```
+
+4. **Access Supabase services**:
+   - **Supabase Studio**: http://localhost:60125 (Web UI)
+   - **PostgreSQL**: localhost:60122 (Direct DB access)
+   - **Kong API Gateway**: localhost:60121 (API endpoint)
+
+5. **Initialize the database**:
+   ```bash
+   cd ../archon
+   docker exec -i supabase-db psql -U postgres -d postgres < migration/complete_setup.sql
+   ```
+
+**Benefits of Local Supabase:**
+- ✅ No cold starts - always instant
+- ✅ No network dependency
+- ✅ No usage limits
+- ✅ Full control over data
+- ✅ Faster development
+
+**To switch back to Cloud Supabase later**, just uncomment the cloud credentials in your `.env` file and restart Archon services.
+
+### Setup Instructions (Cloud Supabase)
 
 1. **Clone Repository**:
    ```bash

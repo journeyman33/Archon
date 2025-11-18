@@ -138,6 +138,31 @@ make test-be             # Backend tests only
 
 @PRPs/ai_docs/ARCHITECTURE.md
 
+#### Docker Network Architecture
+
+Archon uses a shared Docker network (`archon-supabase`) to enable communication between Archon services and Supabase services:
+
+**Network Setup:**
+- Network name: `archon-supabase` (bridge driver)
+- Declared as external in `archon/docker-compose.yml`
+- Created by `supabase-local/docker-compose.yml`
+
+**Connected Services:**
+- `archon-server` - Main FastAPI backend
+- `archon-mcp` - MCP server
+- `archon-agents` - AI agents service (when enabled)
+- `supabase-kong` - API gateway (port 60121 external, 8000 internal)
+- `supabase-rest` - PostgREST (internal only)
+- `supabase-db` - PostgreSQL (port 60122 external, 5432 internal)
+- `supabase-studio` - Management UI (port 60125 external)
+
+**URL Configuration:**
+- From Archon containers: `http://supabase-kong:8000`
+- From host machine: `http://localhost:60121`
+- Allowed HTTP hosts in config: `["localhost", "127.0.0.1", "host.docker.internal", "supabase-rest", "supabase-kong"]`
+
+See `python/src/server/config/config.py:validate_supabase_url()` for HTTP/HTTPS validation logic.
+
 #### TanStack Query Implementation
 
 For architecture and file references:
@@ -188,11 +213,39 @@ Use database values directly (no FE mapping; type‑safe end‑to‑end from BE 
 
 ## Environment Variables
 
-Required in `.env`:
+### Local Supabase (Recommended for Development)
+
+For development, use the local Supabase setup in `../supabase-local/`:
 
 ```bash
-SUPABASE_URL=https://your-project.supabase.co  # Or http://host.docker.internal:8000 for local
-SUPABASE_SERVICE_KEY=your-service-key-here      # Use legacy key format for cloud Supabase
+# Start local Supabase
+cd ../supabase-local
+docker compose -p supabase up -d
+
+# Initialize database
+cd ../archon
+docker exec -i supabase-db psql -U postgres -d postgres < migration/complete_setup.sql
+```
+
+Required in `archon/.env` for local Supabase:
+
+```bash
+SUPABASE_URL=http://supabase-kong:8000
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+```
+
+**Local Supabase Services:**
+- Studio UI: http://localhost:60125
+- API Gateway: http://localhost:60121
+- PostgreSQL: localhost:60122 (postgres/postgres)
+
+### Cloud Supabase (Alternative)
+
+Required in `.env` for cloud Supabase:
+
+```bash
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-key-here  # Use legacy key format
 ```
 
 Optional variables and full configuration:
