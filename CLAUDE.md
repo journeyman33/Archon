@@ -104,24 +104,55 @@ uv run ruff check        # Run linter
 uv run ruff check --fix  # Auto-fix linting issues
 uv run mypy src/         # Type check
 
-# Docker operations
-docker compose up --build -d       # Start all services
-docker compose --profile backend up -d  # Backend only (for hybrid dev)
-docker compose logs -f archon-server   # View server logs
-docker compose logs -f archon-mcp      # View MCP server logs
-docker compose restart archon-server   # Restart after code changes
-docker compose down      # Stop all services
-docker compose down -v   # Stop and remove volumes
+# Docker operations (use -p archon for better namespace isolation)
+docker compose -p archon up --build -d       # Start all services
+docker compose -p archon --profile backend up -d  # Backend only (for hybrid dev)
+docker compose -p archon logs -f archon-server   # View server logs
+docker compose -p archon logs -f archon-mcp      # View MCP server logs
+docker compose -p archon restart archon-server   # Restart after code changes
+docker compose -p archon down      # Stop all services
+docker compose -p archon down -v   # Stop and remove volumes
 ```
+
+### Recommended Startup Workflow
+
+**IMPORTANT**: For the most robust startup experience, use the provided startup scripts:
+
+```bash
+# Windows (PowerShell)
+.\start-archon.ps1
+
+# Linux/Mac
+./start-archon.sh
+```
+
+These scripts:
+- Check prerequisites (Docker, Docker Compose)
+- Start Supabase with proper health checks (if using local)
+- Start Archon services in correct order (archon-server, archon-mcp) with `-p archon` flag
+- Verify each service is healthy before proceeding
+- Test API endpoints
+- Display clear access URLs
+
+**Why use the startup scripts?**
+- Prevents frontend crashes from missing MCP container
+- Ensures backend is fully initialized before frontend connects
+- Validates all services are healthy and responding
+- Provides clear error messages if something fails
+- Uses proper Docker project naming (`-p archon`)
 
 ### Quick Workflows
 
 ```bash
-# Hybrid development (recommended) - backend in Docker, frontend local
-make dev                 # Or manually: docker compose --profile backend up -d && cd archon-ui-main && npm run dev
+# Recommended: Use startup scripts
+.\start-archon.ps1       # Windows (includes health checks and -p archon)
+./start-archon.sh        # Linux/Mac (includes health checks and -p archon)
+
+# Alternative: Hybrid development - backend in Docker, frontend local
+make dev                 # Or manually: docker compose -p archon --profile backend up -d && cd archon-ui-main && npm run dev
 
 # Full Docker mode
-make dev-docker          # Or: docker compose up --build -d
+make dev-docker          # Or: docker compose -p archon up --build -d
 
 # Run linters before committing
 make lint                # Runs both frontend and backend linters
